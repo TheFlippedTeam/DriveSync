@@ -2,11 +2,22 @@ from __future__ import print_function
 import pickle
 import os.path
 from googleapiclient.discovery import build
+from googleapiclient.http import MediaFileUpload
 from google_auth_oauthlib.flow import InstalledAppFlow
 from google.auth.transport.requests import Request
 
 # If modifying these scopes, delete the file token.pickle.
-SCOPES = ['https://www.googleapis.com/auth/drive.metadata.readonly']
+SCOPES = ['https://www.googleapis.com/auth/drive']
+creds = ''
+service = build('drive', 'v3', credentials=creds)
+
+def upload(file_metadata, media):
+    url = 'https://www.googleapis.com/upload/drive/v3/files?uploadType=media'
+    #file_metadata = {'name': 'photo.jpg'}
+    #media = MediaFileUpload('files/photo.jpg', mimetype='image/jpeg')
+    file = service.files().create(body=file_metadata, media_body=media, fields='id').execute()
+
+    print("file ID is " + file.get(id))
 
 def main():
     """Shows basic usage of the Drive v3 API.
@@ -19,6 +30,7 @@ def main():
     if os.path.exists('token.pickle'):
         with open('token.pickle', 'rb') as token:
             creds = pickle.load(token)
+
     # If there are no (valid) credentials available, let the user log in.
     if not creds or not creds.valid:
         if creds and creds.expired and creds.refresh_token:
@@ -31,8 +43,9 @@ def main():
         with open('token.pickle', 'wb') as token:
             pickle.dump(creds, token)
 
-    service = build('drive', 'v3', credentials=creds)
+    #service = build('drive', 'v3', credentials=creds)
 
+    '''
     # Call the Drive v3 API
     results = service.files().list(
         pageSize=10, fields="nextPageToken, files(id, name)").execute()
@@ -44,6 +57,11 @@ def main():
         print('Files:')
         for item in items:
             print(u'{0} ({1})'.format(item['name'], item['id']))
+    '''
 
+    
 if __name__ == '__main__':
     main()
+    file_metadata = {'name': 'test.pdf'}
+    media = MediaFileUpload('test.pdf', mimetype='application/pdf')
+    upload(file_metadata, media)
