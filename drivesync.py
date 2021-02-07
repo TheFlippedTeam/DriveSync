@@ -8,9 +8,6 @@ from google.auth.transport.requests import Request
 
 # If modifying these scopes, delete the file token.pickle.
 SCOPES = ['https://www.googleapis.com/auth/drive']
-creds = ''
-service = build('drive', 'v3', credentials=creds)
-
 
 def upload(file_metadata, media):
     url = 'https://www.googleapis.com/upload/drive/v3/files?uploadType=media'
