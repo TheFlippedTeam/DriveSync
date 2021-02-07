@@ -25,8 +25,6 @@ def on_moved(event):
     print(f"{event.src_path} has been moved to {event.dest_path}!")
 
 if __name__ == "__main__":
-    #map("D:\\Scuola\\1_UniVr")
-
     # Create the event handler
     patterns = "*"
     ignore_patterns = ""
