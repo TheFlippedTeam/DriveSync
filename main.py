@@ -5,13 +5,11 @@ from watchdog.observers import Observer
 from watchdog.events import PatternMatchingEventHandler
 import drivesync
 import ntpath
-
+import logging
+import threading
 
 toPerform = []
-MAIN_PATH = 'D:/All my Stuff/Università/1° Anno/1° Semestre/Analisi 1'
-
-# toPerform.append(["testo.txt","path","download"])
-
+MAIN_PATH = 'D:\\Scuola\\1_UniVr\\1_Anno\\1S\\Storia'
 
 def map(dir):
     print("Checking: " + dir)
@@ -21,16 +19,13 @@ def map(dir):
         for(name) in dirs:
             print(join(root, name))
 
-
 def on_created(event):
     print(f"{event.src_path} has been created!")
     toPerform.append(
         [ntpath.basename(event.src_path), event.src_path, "upload"])
 
-
 def on_deleted(event):
     print(f"{event.src_path} has been deleted!")
-
 
 def on_modified(event):
     print(f"{event.src_path} has been modified!")
@@ -41,7 +36,6 @@ def on_modified(event):
 
     print(toPerform)
 
-
 def on_moved(event):
     print(f"{event.src_path} has been moved to {event.dest_path}!")
     for action in toPerform:
@@ -51,6 +45,32 @@ def on_moved(event):
     if MAIN_PATH in event.dest_path:
         toPerform.append([ntpath.basename(event.dest_path),
                           event.dest_path, "upload"])
+
+def observer_thread():
+    print("Observer started")
+    # Create the Observer
+    path = MAIN_PATH
+    go_recursively = True
+    observer = Observer()
+    observer.schedule(event_handler, path, recursive=go_recursively)
+
+    # Start the Observer
+    observer.start()
+    try:
+        while(True):
+            time.sleep(1)
+    except KeyboardInterrupt:
+        observer.stop()
+        observer.join()
+
+def drivesync_thread():
+    print("Drivesync started")
+    while(True):
+        time.sleep(60 - time.time() % 30)
+        # Things to run
+        for item in toPerform:
+            print(f"Now {item[2]} the file {item[0]} located at {item[1]}")
+        toPerform.clear()
 
 
 if __name__ == "__main__":
@@ -72,18 +92,8 @@ if __name__ == "__main__":
     event_handler.on_modified = on_modified
     event_handler.on_moved = on_moved
 
-    # Create the Observer
-    # Modificare con il path che si vuole controllare
-    path = MAIN_PATH
-    go_recursively = True
-    observer = Observer()
-    observer.schedule(event_handler, path, recursive=go_recursively)
-
-    # Start the Observer
+    observer = threading.Thread(target=observer_thread)
     observer.start()
-    try:
-        while(True):
-            time.sleep(1)
-    except KeyboardInterrupt:
-        observer.stop()
-        observer.join()
+
+    drivesync = threading.Thread(target=drivesync_thread)
+    drivesync.start()
