@@ -123,20 +123,3 @@ class DriveAPI:
 
             # Raise UploadError if file is not uploaded.
             raise UploadError("Can't Upload File.")
-
-
-if __name__ == "__main__":
-    obj = DriveAPI()
-    i = int(input("Enter your choice:1 - Download file, 2- Upload File, 3- Exit.\n"))
-
-    if i == 1:
-        f_id = input("Enter file id: ")
-        f_name = input("Enter file name: ")
-        obj.FileDownload(f_id, f_name)
-
-    elif i == 2:
-        f_path = input("Enter full file path: ")
-        obj.FileUpload(f_path)
-
-    else:
-        exit()
