@@ -1,18 +1,20 @@
 # import the required libraries
 from __future__ import print_function
-import pickle
-import os.path
+
 import io
+import ntpath
+import pickle
 import shutil
+import os.path
 import requests
+import threading
 from mimetypes import MimeTypes
 from googleapiclient.discovery import build
-from google_auth_oauthlib.flow import InstalledAppFlow
 from google.auth.transport.requests import Request
+from google_auth_oauthlib.flow import InstalledAppFlow
 from googleapiclient.http import MediaIoBaseDownload, MediaFileUpload
 
-
-class DriveAPI:
+class DriveAPI():
     global SCOPES
 
     # Define the scopes
@@ -102,7 +104,7 @@ class DriveAPI:
     def FileUpload(self, filepath):
 
         # Extract the file name out of the file path
-        name = filepath.split('/')[-1]
+        name = ntpath.basename(filepath)
 
         # Find the MimeType of the file
         mimetype = MimeTypes().guess_type(name)[0]

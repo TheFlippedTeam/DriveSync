@@ -1,12 +1,12 @@
 import time
+import ntpath
+import logging
+import drivesync
+import threading
 from os import walk
 from os.path import join
 from watchdog.observers import Observer
 from watchdog.events import PatternMatchingEventHandler
-import drivesync
-import ntpath
-import logging
-import threading
 
 toPerform = []
 MAIN_PATH = 'D:\\Scuola\\1_UniVr\\1_Anno\\1S\\Storia'
@@ -23,6 +23,8 @@ def on_created(event):
     print(f"{event.src_path} has been created!")
     toPerform.append(
         [ntpath.basename(event.src_path), event.src_path, "upload"])
+    
+    print(toPerform)
 
 def on_deleted(event):
     print(f"{event.src_path} has been deleted!")
@@ -45,6 +47,8 @@ def on_moved(event):
     if MAIN_PATH in event.dest_path:
         toPerform.append([ntpath.basename(event.dest_path),
                           event.dest_path, "upload"])
+    
+    print(toPerform)
 
 def observer_thread():
     print("Observer started")
@@ -59,24 +63,36 @@ def observer_thread():
     try:
         while(True):
             time.sleep(1)
-    except KeyboardInterrupt:
+    except:
         observer.stop()
         observer.join()
 
-def drivesync_thread():
+def do_actions(action, dir):
+    DriveApiObj = drivesync.DriveAPI()
+    
+    if(action.equals("upload")):
+        DriveApiObj.FileUpload(dir)
+
+def drivesync_thread(DriveApi):
     print("Drivesync started")
     while(True):
-        time.sleep(60 - time.time() % 30)
-        # Things to run
+        time.sleep(10)
+        
+        print(toPerform)
+
         for item in toPerform:
             print(f"Now {item[2]} the file {item[0]} located at {item[1]}")
+            
+            if(item[2] == "upload"):
+                DriveApi.FileUpload(item[1])
+
         toPerform.clear()
 
 
 if __name__ == "__main__":
     # map("D:\\Scuola\\1_UniVr")
 
-    #DriveApiObj = drivesync.DriveAPI()
+    DriveApi = drivesync.DriveAPI()
 
     # Create the event handler
     patterns = "*"
@@ -95,5 +111,7 @@ if __name__ == "__main__":
     observer = threading.Thread(target=observer_thread)
     observer.start()
 
-    drivesync = threading.Thread(target=drivesync_thread)
-    drivesync.start()
+    #drivesync = threading.Thread(target=drivesync_thread)
+    #drivesync.start()
+
+    drivesync_thread(DriveApi)
